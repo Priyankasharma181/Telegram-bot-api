@@ -1,6 +1,10 @@
 const TelegramBot = require('node-telegram-bot-api');
+const axios = require("axios")
+
 require("dotenv").config()
 const token = process.env.TOKEN
+const apiWeatherKey = process.env.APIKEY
+
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {
     polling: true
@@ -63,35 +67,35 @@ bot.on('message', (msg) => {
     if (msg.text.indexOf(activity) == 0) {
         bot.sendMessage(msg.chat.id, " Nothing ")
     }
-});
-
-
-// Location 
-
-bot.on('message', (msg) => {
     var location = "location";
     if (msg.text.indexOf(location) === 0) {
         bot.sendLocation(msg.chat.id, 44.97108, -104.27719);
         bot.sendMessage(msg.chat.id, "Here is the point");
 
     }
-});
-
-bot.on('message', (msg) => {
-
-    var bye = "bye";
-    if (msg.text.toString().toLowerCase().includes(bye)) {
-        bot.sendMessage(msg.chat.id, "Have a nice day " + msg.from.first_name);
-    }
 
 });
+bot.onText(/\/domath/, (msg) => {
+    // console.log(msg);
+    bot.sendMessage(msg.chat.id, eval(msg.text.split(" ")[1]))
+})
 
+// get the weather 
 
-bot.on('message', (msg) => {
+bot.onText(/\/weather/, (msg, match) => {
+    city = match.input.split(" ")[1];
 
-    var what = "idiot";
-    if (msg.text.includes(what)) {
-    bot.kickChatMember(msg.chat.id,  msg.from.id);
-    }
-    
-    });
+    url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}?unitGroup=metric&include=current&key=${apiWeatherKey}&contentType=json`
+    axios.get(url).then(resp => {
+        data = resp.data
+        if (data) {
+            console.log(data);
+            message = `The weather in ${data.address} with a temperature of ${data.days[1]["tempmax"]} degrees Celsius.`
+            bot.sendMessage(msg.chat.id, message)
+        } else {
+            message = `It seems to have an error when finding weather for ${city}.`;
+            bot.sendMessage(msg.chat.id,message)
+        }
+
+    })
+})

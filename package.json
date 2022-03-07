@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.26.0",
     "dotenv": "^16.0.0",
     "node-modules": "^1.0.1",
     "node-telegram-bot-api": "^0.56.0"
