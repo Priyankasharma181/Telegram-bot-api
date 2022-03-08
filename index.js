@@ -6,6 +6,7 @@ const token = process.env.TOKEN
 const apiWeatherKey = process.env.APIKEY
 
 // Create a bot that uses 'polling' to fetch new updates
+// polling option to true. This means the bot will check for incoming messages at regular intervals.
 const bot = new TelegramBot(token, {
     polling: true
 });
@@ -81,15 +82,18 @@ bot.onText(/\/domath/, (msg) => {
 })
 
 // get the weather 
-
+// 'msg' is the received Message from Telegram
 bot.onText(/\/weather/, (msg, match) => {
-    city = match.input.split(" ")[1];
+    // console.log(match)
+    city = match.input.slice(8);
+    console.log(city);
+
 
     url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}?unitGroup=metric&include=current&key=${apiWeatherKey}&contentType=json`
     axios.get(url).then(resp => {
         data = resp.data
         if (data) {
-            console.log(data);
+            // console.log(data);
             message = `The weather in ${data.address} with a temperature of ${data.days[1]["tempmax"]} degrees Celsius.`
             bot.sendMessage(msg.chat.id, message)
         } else {
